@@ -13,7 +13,11 @@ import {
   RobustnessSample,
 } from "../types";
 
-const BASE_URL = (import.meta as any).env?.VITE_API_URL || "/api";
+const BASE_URL =
+  (import.meta as any).env?.VITE_API_URL ||
+  (typeof window !== "undefined" && window.location.hostname === "localhost"
+    ? "http://localhost:8000/api"
+    : "https://kepler-api-2cr7.onrender.com/api");
 
 export const DEFAULT_PROVENANCE: ProvenanceData = {
   spice_kernel_version: "N0067",
