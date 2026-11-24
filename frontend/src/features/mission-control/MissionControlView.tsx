@@ -23,14 +23,20 @@ import {
 interface MissionControlViewProps {
   onOpenRobustness: (site: CandidateSite) => void;
   onOpenDecisionBrief: (site: CandidateSite, timeline: SiteTimelineResult) => void;
+  activeSite?: CandidateSite | null;
+  onSelectSite?: (site: CandidateSite) => void;
+  onTimelineGenerated?: (site: CandidateSite, timeline: SiteTimelineResult) => void;
 }
 
 export const MissionControlView: React.FC<MissionControlViewProps> = ({
   onOpenRobustness,
   onOpenDecisionBrief,
+  activeSite,
+  onSelectSite,
+  onTimelineGenerated,
 }) => {
   const [sites, setSites] = useState<CandidateSite[]>([]);
-  const [selectedSiteId, setSelectedSiteId] = useState<string>("SHACKLETON_RIM");
+  const [selectedSiteId, setSelectedSiteId] = useState<string>(activeSite?.id || "SHACKLETON_RIM");
   const [startTime, setStartTime] = useState<string>("2026-10-01T00:00:00");
   const [endTime, setEndTime] = useState<string>("2026-10-14T00:00:00");
   const [stepMinutes, setStepMinutes] = useState<number>(60);
@@ -44,12 +50,21 @@ export const MissionControlView: React.FC<MissionControlViewProps> = ({
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [displayMode, setDisplayMode] = useState<"3D_SPACECRAFT" | "POLAR_RADAR">("3D_SPACECRAFT");
 
+  // Keep selectedSiteId in sync if activeSite changes externally
+  useEffect(() => {
+    if (activeSite && activeSite.id !== selectedSiteId) {
+      setSelectedSiteId(activeSite.id);
+    }
+  }, [activeSite?.id]);
+
   useEffect(() => {
     fetchCandidateSites()
       .then((data) => {
         setSites(data);
         if (data.length > 0 && !selectedSiteId) {
-          setSelectedSiteId(data[0].id);
+          const initSite = activeSite || data[0];
+          setSelectedSiteId(initSite.id);
+          if (onSelectSite && !activeSite) onSelectSite(initSite);
         }
       })
       .catch((err) => setError("Failed to load candidate sites: " + err.message));
@@ -71,6 +86,9 @@ export const MissionControlView: React.FC<MissionControlViewProps> = ({
         observer_height_m: observerHeight,
       });
       setTimelineData(data);
+      if (onTimelineGenerated && site) {
+        onTimelineGenerated(site, data);
+      }
       setScrubIndex(0);
     } catch (err: any) {
       setError(err.message || "Computation failed");
@@ -131,7 +149,14 @@ export const MissionControlView: React.FC<MissionControlViewProps> = ({
           <span className="text-neutral-400 uppercase tracking-wider font-semibold">Candidate Target:</span>
           <select
             value={selectedSiteId}
-            onChange={(e) => setSelectedSiteId(e.target.value)}
+            onChange={(e) => {
+              const id = e.target.value;
+              setSelectedSiteId(id);
+              const site = sites.find((s) => s.id === id);
+              if (site && onSelectSite) {
+                onSelectSite(site);
+              }
+            }}
             className="bg-black border border-white/20 text-white rounded px-3 py-1.5 focus:border-white focus:outline-none font-semibold cursor-pointer"
           >
             {sites.map((site) => (

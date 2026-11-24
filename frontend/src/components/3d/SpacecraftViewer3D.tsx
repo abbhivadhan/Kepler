@@ -905,28 +905,30 @@ export const SpacecraftViewer3D: React.FC<SpacecraftViewer3DProps> = ({
       ctrl.minDistance = 2.0;
       ctrl.maxDistance = 60.0;
     } else if (cameraVantage === "SURFACE_MAST") {
-      // Observer mast perspective (2m above ground looking towards Sun/Earth)
-      cam.position.set(0, 2.0, 0.5);
-      if (sunTelemetry) {
-        const lookTarget = calcCelestialVector(sunTelemetry.azimuth_deg, sunTelemetry.elevation_deg, 20);
-        ctrl.target.copy(lookTarget);
+      // Authentic 2.0m ground-level observer mast perspective standing on the lunar regolith
+      if (spacecraftType === "ARTEMIS_HLS") {
+        cam.position.set(-3.5, 2.0, 6.2);
+        ctrl.target.set(0, 2.2, 0);
       } else {
-        ctrl.target.set(0, 2.0, 20);
+        cam.position.set(-3.0, 2.0, 5.2);
+        ctrl.target.set(0, 1.5, 0);
       }
       ctrl.minDistance = 0.5;
       ctrl.maxDistance = 100.0;
     } else if (cameraVantage === "COCKPIT") {
-      // Cockpit window vantage looking forward
+      // Flight deck cupola window vantage looking forward toward the horizon
       if (spacecraftType === "ARTEMIS_HLS") {
-        cam.position.set(0, 3.8, 1.0);
-        ctrl.target.set(0, 3.8, 25);
+        cam.position.set(0, 4.10, 0.88);
+        ctrl.target.set(0, 4.05, 25.0);
       } else {
-        cam.position.set(0, 2.6, 0.7);
-        ctrl.target.set(0, 2.6, 25);
+        cam.position.set(0, 2.30, 0.95);
+        ctrl.target.set(0, 2.25, 25.0);
       }
-      ctrl.minDistance = 0.2;
-      ctrl.maxDistance = 50.0;
+      ctrl.minDistance = 0.1;
+      ctrl.maxDistance = 60.0;
     }
+    // Synchronize OrbitControls internal spherical coordinates to prevent camera snaps
+    ctrl.update();
   }, [cameraVantage, sunTelemetry, spacecraftType]);
 
   const handleResetCamera = () => {
@@ -938,6 +940,7 @@ export const SpacecraftViewer3D: React.FC<SpacecraftViewer3DProps> = ({
         cameraRef.current.position.set(6, 4, 8);
         controlsRef.current.target.set(0, 1.8, 0);
       }
+      controlsRef.current.update();
       setCameraVantage("ORBIT");
     }
   };

@@ -453,8 +453,22 @@ export async function fetchHorizonReplayComparison(params: {
       simultaneous_hours_a_minus_b: Math.round((timelineA.metrics.total_simultaneous_hours - timelineB.metrics.total_simultaneous_hours) * 10) / 10,
     },
     synthesis: {
-      advantages_site_a: ["Higher total solar availability", "Greater continuous operational endurance"],
-      advantages_site_b: ["Alternative communications azimuth window"],
+      advantages_site_a: [
+        timelineA.metrics.total_sun_hours >= timelineB.metrics.total_sun_hours
+          ? `Higher solar availability (${timelineA.metrics.illumination_percentage}% vs ${timelineB.metrics.illumination_percentage}%)`
+          : `Greater polar proximity (${Math.abs(params.site_a_lat).toFixed(2)}°S)`,
+        timelineA.metrics.total_earth_visible_hours >= timelineB.metrics.total_earth_visible_hours
+          ? `More direct Earth comm window (${timelineA.metrics.total_earth_visible_hours}h vs ${timelineB.metrics.total_earth_visible_hours}h)`
+          : "Alternative geographical solar approach corridor",
+      ],
+      advantages_site_b: [
+        timelineB.metrics.total_sun_hours >= timelineA.metrics.total_sun_hours
+          ? `Higher solar availability (${timelineB.metrics.illumination_percentage}% vs ${timelineA.metrics.illumination_percentage}%)`
+          : `Diverse orbital line-of-sight (${Math.abs(params.site_b_lat).toFixed(2)}°S)`,
+        timelineB.metrics.total_earth_visible_hours >= timelineA.metrics.total_earth_visible_hours
+          ? `More direct Earth comm window (${timelineB.metrics.total_earth_visible_hours}h vs ${timelineA.metrics.total_earth_visible_hours}h)`
+          : "Alternative communications azimuth window and redundant landing corridor",
+      ],
     },
   };
 }

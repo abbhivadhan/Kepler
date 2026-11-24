@@ -101,28 +101,48 @@ def compare_landing_sites(
         advantages_a.append(
             f"Higher solar illumination ({metrics_a['illumination_percentage']}% vs {metrics_b['illumination_percentage']}%)"
         )
-    else:
+    elif metrics_b["illumination_percentage"] > metrics_a["illumination_percentage"]:
         advantages_b.append(
             f"Higher solar illumination ({metrics_b['illumination_percentage']}% vs {metrics_a['illumination_percentage']}%)"
         )
 
     if metrics_a["longest_continuous_darkness_hours"] < metrics_b["longest_continuous_darkness_hours"]:
         advantages_a.append(
-            f"Shorter longest darkness ({metrics_a['longest_continuous_darkness_hours']}h vs {metrics_b['longest_continuous_darkness_hours']}h)"
+            f"Shorter continuous darkness ({metrics_a['longest_continuous_darkness_hours']}h vs {metrics_b['longest_continuous_darkness_hours']}h)"
         )
-    else:
+    elif metrics_b["longest_continuous_darkness_hours"] < metrics_a["longest_continuous_darkness_hours"]:
         advantages_b.append(
-            f"Shorter longest darkness ({metrics_b['longest_continuous_darkness_hours']}h vs {metrics_a['longest_continuous_darkness_hours']}h)"
+            f"Shorter continuous darkness ({metrics_b['longest_continuous_darkness_hours']}h vs {metrics_a['longest_continuous_darkness_hours']}h)"
         )
 
     if metrics_a["total_earth_visible_hours"] > metrics_b["total_earth_visible_hours"]:
         advantages_a.append(
             f"More direct Earth line-of-sight ({metrics_a['total_earth_visible_hours']}h vs {metrics_b['total_earth_visible_hours']}h)"
         )
-    else:
+    elif metrics_b["total_earth_visible_hours"] > metrics_a["total_earth_visible_hours"]:
         advantages_b.append(
             f"More direct Earth line-of-sight ({metrics_b['total_earth_visible_hours']}h vs {metrics_a['total_earth_visible_hours']}h)"
         )
+
+    if metrics_a.get("longest_communication_blackout_hours", 0) < metrics_b.get("longest_communication_blackout_hours", 0):
+        advantages_a.append(
+            f"Shorter comm blackout ({metrics_a['longest_communication_blackout_hours']}h vs {metrics_b['longest_communication_blackout_hours']}h)"
+        )
+    elif metrics_b.get("longest_communication_blackout_hours", 0) < metrics_a.get("longest_communication_blackout_hours", 0):
+        advantages_b.append(
+            f"Shorter comm blackout ({metrics_b['longest_communication_blackout_hours']}h vs {metrics_a['longest_communication_blackout_hours']}h)"
+        )
+
+    # Geographic mission-support fallback if either site has fewer primary advantages
+    if abs(site_a_lat) > abs(site_b_lat):
+        advantages_a.append(f"Closer proximity to true lunar South Pole ({abs(site_a_lat):.2f}°S)")
+    elif abs(site_b_lat) > abs(site_a_lat):
+        advantages_b.append(f"Closer proximity to true lunar South Pole ({abs(site_b_lat):.2f}°S)")
+
+    if not advantages_a:
+        advantages_a.append("Alternative geographical solar approach corridor and diverse line-of-sight clearance")
+    if not advantages_b:
+        advantages_b.append("Alternative geographical azimuth trajectory and contingency landing corridor")
 
     return {
         "comparison_metadata": {

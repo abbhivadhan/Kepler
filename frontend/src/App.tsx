@@ -25,6 +25,7 @@ export const App: React.FC = () => {
     site: CandidateSite;
     timeline: SiteTimelineResult;
   } | null>(null);
+  const [activeTimeline, setActiveTimeline] = useState<{ siteId: string; timeline: SiteTimelineResult } | null>(null);
   const [isBriefLoading, setIsBriefLoading] = useState<boolean>(false);
   const [provenanceModalOpen, setProvenanceModalOpen] = useState<boolean>(false);
 
@@ -35,23 +36,28 @@ export const App: React.FC = () => {
     const site = activeSite || (candidateSites.length > 0 ? candidateSites[0] : null);
     if (!site) return;
 
-    if (decisionBriefData && decisionBriefData.site.id === site.id) {
+    // If we already have a timeline computed for this exact active site in Mission Control, use it directly!
+    if (activeTimeline && activeTimeline.siteId === site.id) {
+      setDecisionBriefData({ site, timeline: activeTimeline.timeline });
       return;
     }
 
     setIsBriefLoading(true);
+    setDecisionBriefData({ site, timeline: null as any });
     try {
       const timeline = await fetchIlluminationTimeline({
         latitude_deg: site.latitude_deg,
         longitude_deg: site.longitude_deg,
-        start_time: "2026-10-15T12:00:00",
-        end_time: "2026-10-16T12:00:00",
-        step_minutes: 30,
+        start_time: "2026-10-01T00:00:00",
+        end_time: "2026-10-14T00:00:00",
+        step_minutes: 60,
         observer_height_m: observerHeightM,
       });
       setDecisionBriefData({ site, timeline });
+      setActiveTimeline({ siteId: site.id, timeline });
     } catch (err) {
       console.error("Failed to load decision brief timeline:", err);
+      setDecisionBriefData(null);
     } finally {
       setIsBriefLoading(false);
     }
@@ -110,10 +116,17 @@ export const App: React.FC = () => {
 
         {currentMode === "MISSION_CONTROL" && (
           <MissionControlView
+            activeSite={activeSite}
+            onSelectSite={(site) => setActiveSite(site)}
+            onTimelineGenerated={(site, timeline) => {
+              setActiveTimeline({ siteId: site.id, timeline });
+            }}
             onOpenRobustness={(site) => setRobustnessSite(site)}
-            onOpenDecisionBrief={(site, timeline) =>
-              setDecisionBriefData({ site, timeline })
-            }
+            onOpenDecisionBrief={(site, timeline) => {
+              setActiveSite(site);
+              setActiveTimeline({ siteId: site.id, timeline });
+              setDecisionBriefData({ site, timeline });
+            }}
           />
         )}
 

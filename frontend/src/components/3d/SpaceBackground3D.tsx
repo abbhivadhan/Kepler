@@ -136,15 +136,16 @@ export const SpaceBackground3D: React.FC = () => {
     const moonMat = new THREE.MeshStandardMaterial({
       map: moonMap,
       bumpMap: moonBump,
-      bumpScale: 0.032, // Crisp micro-crater relief without artificial shadow blotches
+      bumpScale: 0.042, // Crisp, tangible crater rim depth and micro-crater topography
       color: 0xffffff, // Calibrated warm rusty lunar albedo embedded in 4K map
-      roughness: 0.94, // Authentic diffuse scattering across lunar surface
+      roughness: 0.92, // Authentic diffuse scattering across lunar surface
       metalness: 0.0,
     });
 
     const moonMesh = new THREE.Mesh(moonGeo, moonMat);
-    moonMesh.rotation.z = 0.12;
-    moonMesh.rotation.y = 1.25; // Orient towards high-relief southern cratered terrain
+    moonMesh.rotation.x = 0.22; // Tilt heavily cratered southern highlands into grazing sunlight
+    moonMesh.rotation.z = 0.08;
+    moonMesh.rotation.y = 0.10; // Orient directly towards dense crater-rich highland impact basins
     moonGroup.add(moonMesh);
 
     // 7. Animation Loop
@@ -155,8 +156,8 @@ export const SpaceBackground3D: React.FC = () => {
       animId = requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
 
-      // Majestic lunar axial rotation
-      moonMesh.rotation.y = 1.25 + elapsed * 0.012;
+      // Majestic lunar axial rotation maintaining prominence of cratered terrain
+      moonMesh.rotation.y = 0.10 + elapsed * 0.008;
 
       // Gentle background stars cosmic drift
       if (starsRef.current) {
