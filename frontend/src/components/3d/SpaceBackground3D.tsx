@@ -143,9 +143,9 @@ export const SpaceBackground3D: React.FC = () => {
     });
 
     const moonMesh = new THREE.Mesh(moonGeo, moonMat);
-    moonMesh.rotation.x = 0.22; // Tilt heavily cratered southern highlands into grazing sunlight
-    moonMesh.rotation.z = 0.08;
-    moonMesh.rotation.y = 0.10; // Orient directly towards dense crater-rich highland impact basins
+    moonMesh.rotation.x = 0.0;
+    moonMesh.rotation.z = 0.12;
+    moonMesh.rotation.y = 3.40; // Exact match to user reference: deep rich mare color & dramatic Copernicus crater field
     moonGroup.add(moonMesh);
 
     // 7. Animation Loop
@@ -156,8 +156,8 @@ export const SpaceBackground3D: React.FC = () => {
       animId = requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
 
-      // Majestic lunar axial rotation maintaining prominence of cratered terrain
-      moonMesh.rotation.y = 0.10 + elapsed * 0.008;
+      // Slow, majestic lunar axial rotation keeping the deep-contrast cratered face in view
+      moonMesh.rotation.y = 3.40 + elapsed * 0.003;
 
       // Gentle background stars cosmic drift
       if (starsRef.current) {
