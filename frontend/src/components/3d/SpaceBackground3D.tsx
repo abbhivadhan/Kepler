@@ -156,8 +156,8 @@ export const SpaceBackground3D: React.FC = () => {
       animId = requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
 
-      // Slow, majestic lunar axial rotation keeping the deep-contrast cratered face in view
-      moonMesh.rotation.y = 3.40 + elapsed * 0.003;
+      // Majestic lunar axial rotation
+      moonMesh.rotation.y = 3.40 + elapsed * 0.012;
 
       // Gentle background stars cosmic drift
       if (starsRef.current) {
